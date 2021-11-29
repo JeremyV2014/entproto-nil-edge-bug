@@ -11,8 +11,17 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// EdgePet holds the string denoting the pet edge name in mutations.
+	EdgePet = "pet"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// PetTable is the table that holds the pet relation/edge.
+	PetTable = "pets"
+	// PetInverseTable is the table name for the Pet entity.
+	// It exists in this package in order to avoid circular dependency with the "pet" package.
+	PetInverseTable = "pets"
+	// PetColumn is the table column denoting the pet relation/edge.
+	PetColumn = "user_pet"
 )
 
 // Columns holds all SQL columns for user fields.

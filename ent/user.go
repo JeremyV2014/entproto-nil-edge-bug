@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/bug/ent/pet"
 	"entgo.io/bug/ent/user"
 	"entgo.io/ent/dialect/sql"
 )
@@ -19,6 +20,32 @@ type User struct {
 	Age int `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// Pet holds the value of the pet edge.
+	Pet *Pet `json:"pet,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// PetOrErr returns the Pet value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) PetOrErr() (*Pet, error) {
+	if e.loadedTypes[0] {
+		if e.Pet == nil {
+			// The edge pet was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: pet.Label}
+		}
+		return e.Pet, nil
+	}
+	return nil, &NotLoadedError{edge: "pet"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -66,6 +93,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryPet queries the "pet" edge of the User entity.
+func (u *User) QueryPet() *PetQuery {
+	return (&UserClient{config: u.config}).QueryPet(u)
 }
 
 // Update returns a builder for updating this User.
